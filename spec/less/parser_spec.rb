@@ -14,8 +14,10 @@ describe Less::Parser do
       subject.parse(".class {width: 1+1}").to_css(:compress => true).strip.should eql ".class{width:2;}"
     end
   end
+
   it "throws a ParseError if the lesscss is bogus" do
     expect {subject.parse('{^)')}.should raise_error(Less::ParseError)
+    expect {subject.parse('this surely is invalid@#%@#%@#!!!!')}.should raise_error(Less::ParseError)
   end
 
   describe "when configured with multiple load paths" do

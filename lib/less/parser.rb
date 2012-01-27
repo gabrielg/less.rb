@@ -56,7 +56,7 @@ module Less
       end
     end
 
-    # Convert `less` source into a abstract syntaxt tree
+    # Convert `less` source into a abstract syntax tree
     # @param [String] less the source to parse
     # @return [Less::Tree] the parsed tree
     def parse(less)
@@ -65,6 +65,7 @@ module Less
         @parser.parse(less, lambda {|e, t|
           error = e; tree = t
         })
+        raise ParseError.new(error) if error
         Tree.new(tree) if tree
       end
     end
@@ -90,21 +91,15 @@ module Less
     end
   end
 
-  # Thrown whenever an error occurs parsing
-  # and/or serializing less source. It is intended
-  # to wrap a native V8::JSError
+  # Thrown whenever an error occurs parsing and/or serializing less source. It is intended
+  # to wrap a native V8::JSError, or any other error type thrown from the Less.js code
+  # itself.
   class ParseError < StandardError
+    attr_reader :original
 
-    # Copies over `error`'s message and backtrace
-    # @param [V8::JSError] error native error
-    def initialize(error)
-      super(error.message)
-      @backtrace = error.backtrace
-    end
-
-    # @return [Array] the backtrace frames
-    def backtrace
-      @backtrace
+    # @param [Object] error original exception
+    def initialize(original)
+      @original = original
     end
   end
 end
